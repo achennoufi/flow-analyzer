@@ -1,16 +1,18 @@
-import cv2
 import os
+import numpy as np
+import cv2
 from ultralytics import YOLO
 
-import numpy as np
-from ultralytics import solutions
-
+KPT_NAMES = [
+    'Nose', 'L_Eye', 'R_Eye', 'L_Ear', 'R_Ear',
+    'L_Shoulder', 'R_Shoulder', 'L_Elbow', 'R_Elbow',
+    'L_Wrist', 'R_Wrist', 'L_Hip', 'R_Hip', 'L_Knee',
+    'R_Knee', 'L_Ankle', 'R_Ankle'
+]
 
 def load_model(task: str, size: str):
-
     weights_path = os.path.join("app","models","weights")
     model_name = f"yolo11{size}"
-
     if size != "custom":
         if task == "detect":
             model_path = os.path.join(weights_path, f"{model_name}.onnx")
@@ -19,16 +21,7 @@ def load_model(task: str, size: str):
     else:
         model_path = os.path.join(weights_path, f"{model_name}-custom.onnx")
     model = YOLO(model_path)
-
     return model
-
-
-KPT_NAMES = [
-    'Nose', 'L_Eye', 'R_Eye', 'L_Ear', 'R_Ear',
-    'L_Shoulder', 'R_Shoulder', 'L_Elbow', 'R_Elbow',
-    'L_Wrist', 'R_Wrist', 'L_Hip', 'R_Hip', 'L_Knee',
-    'R_Knee', 'L_Ankle', 'R_Ankle'
-]
 
 def get_zone(point, zones):
     for i, zone in enumerate(zones):
@@ -46,7 +39,6 @@ def rect_to_polygon(rect):
     ]
 
 def get_frame_stats(results, frame_index, rois=[]):
-
     """Retourne une liste de dictionnaires avec les stats frame-par-frame"""
     frame_data = []
 
@@ -83,5 +75,4 @@ def get_frame_stats(results, frame_index, rois=[]):
                         person_data[f"{KPT_NAMES[idx]}_y"] = None if xk == 0.0 and yk == 0.0 else yk
 
                 frame_data.append(person_data)
-
     return frame_data

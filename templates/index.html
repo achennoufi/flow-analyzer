@@ -76,7 +76,7 @@
 
   <div id="dashboard">
     <div id="video-container" class="card">
-      <img id="video-stream" width="640" height="480" style="width:640px; height:480px;">
+      <canvas id="video-stream" width="640" height="480" style="width:640px; height:480px;"></canvas>
     </div>
     <div id="right-container">
       <div id="kpi-row">
@@ -126,7 +126,8 @@
       roisContainer.appendChild(div);
     });
 
-    // Submit form
+    let wsVideo; // WebSocket vidéo
+
     form.addEventListener("submit", async (e) => {
       e.preventDefault();
       const source = document.querySelector('input[name="source"]:checked').value;
@@ -153,12 +154,29 @@
         videoPath = data.path;
       }
 
-      // Construire URL stream
-      let url = `/stream?source=${source}&task=${task}&size=${size}`;
-      if (videoPath) url += `&path=${videoPath}`;
-      url += `&rois=${encodeURIComponent(JSON.stringify(rois))}`;
+      // --- Fermer les anciens WebSockets ---
+      if (wsVideo) wsVideo.close();
+      if (ws) ws.close();
 
-      videoStream.src = url;
+      // --- WebSocket vidéo ---
+      const canvas = document.getElementById("video-stream");
+      const ctx2d = canvas.getContext("2d");
+
+      let wsVideoUrl = `ws://${window.location.host}/ws/video?source=${source}&task=${task}&size=${size}`;
+      if (videoPath) wsVideoUrl += `&path=${encodeURIComponent(videoPath)}`;
+      wsVideoUrl += `&rois=${encodeURIComponent(JSON.stringify(rois))}`;
+
+      wsVideo = new WebSocket(wsVideoUrl);
+      wsVideo.binaryType = "blob";
+      wsVideo.onmessage = (event) => {
+        const url = URL.createObjectURL(event.data);
+        const img = new Image();
+        img.onload = () => {
+          ctx2d.drawImage(img, 0, 0, canvas.width, canvas.height);
+          URL.revokeObjectURL(url);
+        };
+        img.src = url;
+      };
 
       // WebSocket KPIs
       if (ws) ws.close();
@@ -183,8 +201,8 @@
     const ctx = document.getElementById('kpiChart').getContext('2d');
     const kpiChart = new Chart(ctx, {
       type: 'line',
-      data: { labels: [], datasets: [{ label: 'Comptages', data: [], fill: true, backgroundColor: 'rgba(0,123,255,0.2)', borderColor: 'rgba(0,123,255,1)', tension: 0.3 }] },
-      options: { responsive: true, animation: false, scales: { x: { title: { display: true, text: 'Temps' } }, y: { beginAtZero: true, title: { display: true, text: 'Comptages' } } } }
+      data: { labels: [], datasets: [{ label: 'Counts', data: [], fill: true, backgroundColor: 'rgba(0,123,255,0.2)', borderColor: 'rgba(0,123,255,1)', tension: 0.3 }] },
+      options: { responsive: true, animation: false, scales: { x: { title: { display: true, text: 'Time' } }, y: { beginAtZero: true, title: { display: true, text: 'Counts' } } } }
     });
   </script>
 </body>
