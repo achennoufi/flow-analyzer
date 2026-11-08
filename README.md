@@ -66,4 +66,4 @@ uvicorn app.main:app --reload
 
 Then open your browser at 👉 http://127.0.0.1:8000
 
-👉 Here you go! 🎉
+👉 There you go! 🎉
