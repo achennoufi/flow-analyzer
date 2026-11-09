@@ -29,7 +29,7 @@ Export detection results in **CSV** format:
 
 - Clone the respository & navigate to it:
 ```
-git clone https://github.com/Aziz2805/flow-analyzer
+git clone https://github.com/achennoufi/flow-analyzer
 cd flow-analyzer
 ```
 
