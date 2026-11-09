@@ -47,8 +47,8 @@ flow-analyzer/
 
 - Create a virtual environment & activate it
 ```
-python -m venv flow-analyzer-env
-flow-analyzer-env\Scripts\activate 
+python -m venv venv
+venv\Scripts\activate 
 ```
 - Upgrade pip & install requirements
 ```
